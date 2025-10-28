@@ -22,27 +22,27 @@ The **Voice-to-Vector** system automates the process of turning spoken thoughts 
 ## 🧩 Architecture
 [Voice-to-Vector Architecture Diagram](https://github.com/98Devops/Voice-to-vector/blob/c401dcc1d6acf5a8c37a8e51db56cd5a3e13641c/architecture-diagram.png.png)
 
-Voice Input 🎤
+🎙️Voice Input 
 
-⬇️️
+     ⬇️️
 
-[Flask API Server] — handles upload, processing, and response
+💻[Flask API Server] — handles upload, processing, and response
 
-⬇️
+     ⬇️
 
-[Whisper API] — transcription
+🧩[Whisper API] — transcription
 
-⬇️
+     ⬇️
 
-[Gemini ] — enrichment + intent recognition
+🤖[Gemini ] — enrichment + intent recognition
 
-⬇️
+     ⬇️
+  
+🗄️[SentenceTransformer + Qdrant] — embeddings + vector storage
 
-[SentenceTransformer + Qdrant] — embeddings + vector storage
+     ⬇️
 
-⬇️
-
-[Search Endpoint] — query for semantically similar notes
+🔍[Search Endpoint] — query for semantically similar notes
 
 
 **Key Components**
