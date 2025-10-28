@@ -62,10 +62,9 @@ Voice Input 🎤
 |-------|-------------|
 | **Frontend/Input** | Local or browser-based audio recorder |
 | **Backend/API** | Flask, Python |
-| **AI/ML** | Whisper API, OpenRouter (Gemini 2.5 Pro / Claude / GPT) |
+| **AI/ML** | Whisper API, (Gemini 2.5 Pr |
 | **Vector DB** | Qdrant |
 | **Embeddings** | SentenceTransformers (`all-MiniLM-L6-v2`) |
-| **Automation** | n8n (optional orchestration) |
 
 ---
 
@@ -81,7 +80,7 @@ Create a .env file:
 
 QDRANT_HOST=localhost
 QDRANT_PORT=6333
-OPENROUTER_API_KEY=your_api_key_here
+GEMINI_API_KEY=your_api_key_here
 WHISPER_API_KEY=your_whisper_api_key_here
 
 3️⃣ Install Dependencies
