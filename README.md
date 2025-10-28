@@ -1,6 +1,4 @@
-# Voice-to-vector
 
-Voice-to-Vector AI System — Flask-based pipeline that transcribes voice notes, extracts insights with LLMs, and stores embeddings in a vector database for semantic search.
 # 🧠 Voice-to-Vector AI System
 
 A Flask-based AI system that transforms **voice notes into structured insights** and stores them in a **vector database** for semantic retrieval.  
