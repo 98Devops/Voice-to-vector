@@ -1,5 +1,5 @@
 # Voice-to-vector
-[Voice-to-Vector Architecture Diagram](./assets/architecture-diagram.png)
+[Voice-to-Vector Architecture Diagram](https://github.com/98Devops/Voice-to-vector/blob/c401dcc1d6acf5a8c37a8e51db56cd5a3e13641c/architecture-diagram.png.png)
 Voice-to-Vector AI System — Flask-based pipeline that transcribes voice notes, extracts insights with LLMs, and stores embeddings in a vector database for semantic search.
 # 🧠 Voice-to-Vector AI System
 
