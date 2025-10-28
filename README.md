@@ -49,7 +49,7 @@ Voice Input 🎤
 - **Flask**: API backend handling requests and orchestration  
 - **Qdrant**: Vector database storing embeddings and metadata  
 - **SentenceTransformer**: Generates text embeddings  
-- **OpenRouter API (Gemini 2.5 Pro)**: AI reasoning layer for structuring and tagging insights  
+- **LLM API (Gemini 2.5 Pro)**: AI reasoning layer for structuring and tagging insights  
 - **Whisper API**: Speech-to-text transcription  
 
 
@@ -72,7 +72,7 @@ Voice Input 🎤
 |-------|-------------|
 | **Frontend/Input** | Local or browser-based audio recorder |
 | **Backend/API** | Flask, Python |
-| **AI/ML** | Whisper API, (Gemini 2.5 Pr |
+| **AI/ML** | Whisper API, (Gemini 2.5 Pro) |
 | **Vector DB** | Qdrant |
 | **Embeddings** | SentenceTransformers (`all-MiniLM-L6-v2`) |
 
