@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voice Memory Assistant</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 20px;
+            color: #333;
+        }
+        .container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            max-width: 800px;
+            margin: 20px auto;
+        }
+        h1, h2 {
+            color: #0056b3;
+            text-align: center;
+        }
+        .section {
+            margin-bottom: 30px;
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-right: 10px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        input[type="text"] {
+            width: calc(100% - 120px);
+            padding: 8px;
+            margin-right: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .message {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .message.success {
+            background-color: #d4edda;
+            color: #155724;
+            border-color: #c3e6cb;
+        }
+        .message.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border-color: #f5c6cb;
+        }
+        #audioPlayback {
+            margin-top: 15px;
+            width: 100%;
+        }
+        #searchResults {
+            margin-top: 20px;
+        }
+        .result-item {
+            border: 1px solid #eee;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            background-color: #fff;
+        }
+        .result-item p {
+            margin: 5px 0;
+        }
+        .result-item strong {
+            color: #0056b3;
+        }
+        .result-item ul {
+            padding-left: 20px;
+            margin-top: 5px;
+        }
+        .result-item li {
+            margin-bottom: 3px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Voice Memory Assistant</h1>
+
+        <div class="section">
+            <h2>Record and Store Voice Notes</h2>
+            <button id="startRecording">Start Recording</button>
+            <button id="stopRecording" disabled>Stop Recording</button>
+            <audio id="audioPlayback" controls></audio>
+            <div id="recordingStatus" class="message"></div>
+        </div>
+
+        <div class="section">
+            <h2>Search Your Memory</h2>
+            <input type="text" id="searchQuery" placeholder="Enter search query...">
+            <button id="searchNotes">Search Notes</button>
+            <div id="searchStatus" class="message"></div>
+            <div id="searchResults"></div>
+        </div>
+    </div>
+
+    <script>
+        const startRecordingButton = document.getElementById('startRecording');
+        const stopRecordingButton = document.getElementById('stopRecording');
+        const audioPlayback = document.getElementById('audioPlayback');
+        const recordingStatus = document.getElementById('recordingStatus');
+        const searchQueryInput = document.getElementById('searchQuery');
+        const searchNotesButton = document.getElementById('searchNotes');
+        const searchStatus = document.getElementById('searchStatus');
+        const searchResultsDiv = document.getElementById('searchResults');
+
+        let mediaRecorder;
+        let audioChunks = [];
+        let audioBlob;
+
+        // --- Configuration ---
+        // IMPORTANT: Replace with the actual URL copied from your n8n Webhook node.
+        const N8N_WEBHOOK_URL = 'http://localhost:5678/webhook/voice-note-process'; 
+        const FLASK_API_BASE_URL = 'http://localhost:5000'; 
+        // -------------------
+
+        startRecordingButton.addEventListener('click', async () => {
+            recordingStatus.textContent = 'Starting recording...';
+            recordingStatus.className = 'message';
+            audioChunks = [];
+            audioPlayback.src = '';
+
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(stream);
+
+                mediaRecorder.ondataavailable = event => {
+                    audioChunks.push(event.data);
+                };
+
+                mediaRecorder.onstop = async () => {
+                    audioBlob = new Blob(audioChunks, { type: 'audio/webm;codecs=opus' });
+                    audioPlayback.src = URL.createObjectURL(audioBlob);
+                    recordingStatus.textContent = 'Recording stopped. Uploading...';
+                    recordingStatus.className = 'message';
+                    await uploadAudio(audioBlob);
+                };
+
+                mediaRecorder.start();
+                startRecordingButton.disabled = true;
+                stopRecordingButton.disabled = false;
+                recordingStatus.textContent = 'Recording... Speak now!';
+                recordingStatus.className = 'message';
+
+            } catch (err) {
+                recordingStatus.textContent = `Error starting recording: ${err.message}`;
+                recordingStatus.className = 'message error';
+                console.error('Error accessing microphone:', err);
+                startRecordingButton.disabled = false;
+                stopRecordingButton.disabled = true;
+            }
+        });
+
+        stopRecordingButton.addEventListener('click', () => {
+            if (mediaRecorder && mediaRecorder.state === 'recording') {
+                mediaRecorder.stop();
+                startRecordingButton.disabled = false;
+                stopRecordingButton.disabled = true;
+            }
+        });
+
+        async function uploadAudio(blob) {
+            try {
+                const formData = new FormData();
+                formData.append('audio', blob, 'voice_note.webm'); // 'audio' is the field name for the binary file
+
+                const response = await fetch(N8N_WEBHOOK_URL, {
+                    method: 'POST',
+                    body: blob, 
+                    headers: {
+                        'Content-Type': 'audio/webm', 
+                    }
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    recordingStatus.textContent = `Upload successful! ${JSON.stringify(result)}`;
+                    recordingStatus.className = 'message success';
+                } else {
+                    const errorText = await response.text();
+                    recordingStatus.textContent = `Upload failed: ${response.status} - ${errorText}`;
+                    recordingStatus.className = 'message error';
+                }
+            } catch (error) {
+                recordingStatus.textContent = `Network or processing error: ${error.message}`;
+                recordingStatus.className = 'message error';
+                console.error('Upload error:', error);
+            }
+        }
+
+        searchNotesButton.addEventListener('click', async () => {
+            const query = searchQueryInput.value.trim();
+            if (!query) {
+                searchStatus.textContent = 'Please enter a search query.';
+                searchStatus.className = 'message error';
+                return;
+            }
+
+            searchStatus.textContent = 'Searching...';
+            searchStatus.className = 'message';
+            searchResultsDiv.innerHTML = ''; // Clear previous results
+
+            try {
+                const response = await fetch(`${FLASK_API_BASE_URL}/search_voice_notes`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ query: query })
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    if (result.results && result.results.length > 0) {
+                        displaySearchResults(result.results);
+                        searchStatus.textContent = `Found ${result.results.length} results.`;
+                        searchStatus.className = 'message success';
+                    } else {
+                        searchStatus.textContent = 'No matching voice notes found.';
+                        searchStatus.className = 'message';
+                    }
+                } else {
+                    const errorText = await response.text();
+                    searchStatus.textContent = `Search failed: ${response.status} - ${errorText}`;
+                    searchStatus.className = 'message error';
+                }
+            } catch (error) {
+                searchStatus.textContent = `Network or processing error: ${error.message}`;
+                searchStatus.className = 'message error';
+                console.error('Search error:', error);
+            }
+        });
+
+        function displaySearchResults(results) {
+            searchResultsDiv.innerHTML = '';
+            results.forEach(result => {
+                const itemDiv = document.createElement('div');
+                itemDiv.classList.add('result-item');
+                itemDiv.innerHTML = `
+                    <p><strong>Score:</strong> ${result.score ? result.score.toFixed(4) : 'N/A'}</p>
+                    <p><strong>Text:</strong> ${result.text}</p>
+                    <p><strong>Tags:</strong> ${Array.isArray(result.tags) ? result.tags.join(', ') : result.tags}</p>
+                    <p><strong>Sentiment:</strong> ${result.sentiment || 'N/A'}</p>
+                    ${result.action_items && result.action_items.length > 0 ? 
+                        `<strong>Action Items:</strong><ul>${result.action_items.map(ai => 
+                            `<li>${ai.item || 'N/A'} (Due: ${ai.due_date || 'N/A'}, Responsible: ${ai.responsible || 'N/A'})</li>`
+                        ).join('')}</ul>` 
+                        : '<p><strong>Action Items:</strong> None</p>'}
+                    <p><strong>Timestamp:</strong> ${result.timestamp ? new Date(result.timestamp * 1000).toLocaleString() : 'N/A'}</p>
+                    <p><strong>ID:</strong> ${result.id}</p>
+                `;
+                searchResultsDiv.appendChild(itemDiv);
+            });
+        }
+    </script>
+</body>
+</html>
