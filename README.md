@@ -1,11 +1,12 @@
-## Architecture
 
-![Architecture Diagram](architecture-diagram.png.png)
 # 🧠 Voice-to-Vector AI System
 
 A Flask-based AI system that transforms **voice notes into structured insights** and stores them in a **vector database** for semantic retrieval.  
 This project demonstrates an **end-to-end intelligence pipeline** — from voice recording to actionable knowledge — integrating transcription, LLM reasoning, and vector storage.
 
+## Architecture
+
+![Architecture Diagram](architecture-diagram.png.png)
 ---
 
 ## 🚀 Overview
@@ -20,9 +21,6 @@ The **Voice-to-Vector** system automates the process of turning spoken thoughts 
 5. **Semantic Search** → query system retrieves related insights by meaning
 
 ---
-
-## 🧩 Architecture
-[Voice-to-Vector Architecture Diagram](https://github.com/98Devops/Voice-to-vector/blob/c401dcc1d6acf5a8c37a8e51db56cd5a3e13641c/architecture-diagram.png.png)
 
 🎙️Voice Input 
 
