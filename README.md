@@ -1,4 +1,6 @@
+## Architecture
 
+![Architecture Diagram](architecture-diagram.png.png)
 # 🧠 Voice-to-Vector AI System
 
 A Flask-based AI system that transforms **voice notes into structured insights** and stores them in a **vector database** for semantic retrieval.  
