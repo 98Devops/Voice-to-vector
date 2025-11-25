@@ -6,7 +6,7 @@ This project demonstrates an **end-to-end intelligence pipeline** — from voice
 
 ## Architecture
 
-![Architecture Diagram](architecture-diagram.png)
+![Architecture Diagram](architecture.png)
 ---
 
 ## 🚀 Overview
